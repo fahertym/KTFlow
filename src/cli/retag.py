@@ -20,10 +20,13 @@ def main(argv: list[str] | None = None) -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--rules-only", action="store_true")
     mode.add_argument("--ml-only", action="store_true")
+    parser.add_argument("--hf-model-dir", help="Use HF classifier at this path for tagging")
+    parser.add_argument("--hybrid", action="store_true", help="Use hybrid with HF model")
     parser.add_argument("--gap", type=float, default=0.25, help="Confidence gap for hybrid")
     args = parser.parse_args(argv)
 
     model = load_joblib(args.model) if (args.model and not args.rules_only) else None
+    hf_dir = args.hf_model_dir
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -43,6 +46,19 @@ def main(argv: list[str] | None = None) -> int:
                 from ktflow.tag.ml import predict
 
                 label = predict(model, [text])[0]
+            elif hf_dir and args.hybrid:
+                # Hybrid with HF: choose HF label unless rules strongly fire
+                from ktflow.tag.hf import predict_hf
+
+                rule = tag_sentence_rules(text)
+                if rule != "UNK":
+                    label = str(rule)
+                else:
+                    label = predict_hf(hf_dir, [text])[0]
+            elif hf_dir:
+                from ktflow.tag.hf import predict_hf
+
+                label = predict_hf(hf_dir, [text])[0]
             else:
                 label = str(
                     tag_sentence_hybrid(
