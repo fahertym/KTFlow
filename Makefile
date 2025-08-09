@@ -24,6 +24,15 @@ test:
 cov:
 	PYTHONPATH=src pytest -q --cov=ktflow --cov-report=term-missing
 
+test-all:
+	PYTHONPATH=src pytest -q -m "not gpu" --cov=ktflow --cov-report=term-missing
+
+test-gpu:
+	PYTHONPATH=src pytest -q -m "gpu"
+
+cov-gate:
+	PYTHONPATH=src pytest -q --cov=ktflow --cov-report=term-missing --cov-fail-under=60
+
 run_demo:
 	PYTHONPATH=src $(PYTHON) src/cli/parse_doc.py --input data/raw/kt_control_v1.pdf --out-sentences data/processed/kt_control_v1_sentences.jsonl --out-flows data/processed/kt_control_v1_flows.csv --window 3 --viz data/processed/kt_control_v1_flows.png
 

@@ -1,27 +1,69 @@
 name: CI
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
-  build:
+  lint-types:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install dependencies
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
+      - run: python -m pip install -U pip
+      - run: python -m pip install . pre-commit mypy
+      - run: pre-commit run --all-files
+      - run: mypy src
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
+      - run: python -m pip install -U pip
+      - run: python -m pip install pdfminer.six scikit-learn matplotlib pydantic-settings pytest pytest-cov
+      - run: echo "[pytest]" > pytest.ini && echo "addopts = -m \"not slow and not gpu\"" >> pytest.ini
+      - env:
+          PYTHONPATH: ${{ github.workspace }}/src
+        run: pytest -q --cov=ktflow --cov-report=term-missing
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ktflow-reports
+          path: |
+            data/processed/*.html
+            data/processed/*.png
+            data/processed/*sankey.html
+          if-no-files-found: ignore
+
+  gpu-smoke:
+    if: false
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -U pip
+      - run: python -m pip install ".[gpu]"
+      - name: Torch sanity
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install pytest pytest-cov pdfminer.six scikit-learn matplotlib pydantic-settings
-      - name: Run tests
+          python - <<'PY'
+          import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())
+          assert torch.cuda.is_available()
+          PY
+      - name: GPU tests
         env:
           PYTHONPATH: ${{ github.workspace }}/src
-        run: |
-          pytest -q --cov=ktflow --cov-report=term-missing
+        run: pytest -q -m "gpu"
 

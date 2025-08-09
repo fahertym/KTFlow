@@ -35,6 +35,18 @@ pytest -q
 pytest -q --cov=ktflow --cov-report=term-missing
 ```
 
+### CI
+
+- Fast defaults skip heavy GPU/HF tests via `pytest.ini` markers (`slow`, `gpu`).
+- Make targets:
+
+```bash
+make test        # fast tests
+make test-all    # includes slow, skips gpu
+make test-gpu    # gpu-only (on CUDA machines)
+make cov-gate    # enforce coverage ≥ 60%
+```
+
 ### KT Layers (labels)
 
 | Label | Name       | Summary |
