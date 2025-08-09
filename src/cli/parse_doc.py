@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """KTFlow CLI: Parse a PDF document, tag sentences, and map flows.
@@ -14,22 +15,21 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import List
 
 from ktflow.config import Settings, setup_logging
 from ktflow.ingest.pdf import extract_text_from_pdf
+from ktflow.io.jsonl import write_jsonl
+from ktflow.map.graph import build_flow_counts, find_motifs, to_edge_list_csv
+from ktflow.map.viz import draw_flow_graph
 from ktflow.segment.sentence import split_sentences
 from ktflow.tag.rules import tag_sentence_rules
-from ktflow.io.jsonl import write_jsonl
-from ktflow.map.graph import build_flow_counts, to_edge_list_csv, find_motifs
-from ktflow.map.viz import draw_flow_graph
 
 
 def _infer_doc_id(input_path: Path) -> str:
     return input_path.stem
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:  # noqa: PLR0912, PLR0915
     settings = Settings()
 
     parser = argparse.ArgumentParser(description="KTFlow PDF parser")
@@ -39,9 +39,7 @@ def main(argv: List[str] | None = None) -> int:
         required=True,
         help="Output JSONL for sentence records",
     )
-    parser.add_argument(
-        "--out-flows", required=True, help="Output CSV for flow edge list"
-    )
+    parser.add_argument("--out-flows", required=True, help="Output CSV for flow edge list")
     parser.add_argument(
         "--window",
         type=int,
@@ -99,16 +97,18 @@ def main(argv: List[str] | None = None) -> int:
             sentences = [s for s in split_sentences(text) if s.strip()]
 
         records = []
-        labels: List[str] = []
+        labels: list[str] = []
         for i, s in enumerate(sentences):
             label = tag_sentence_rules(s)
             labels.append(label)
-            records.append({
-                "doc_id": doc_id,
-                "i": i,
-                "text": s,
-                "layer": label,
-            })
+            records.append(
+                {
+                    "doc_id": doc_id,
+                    "i": i,
+                    "text": s,
+                    "layer": label,
+                }
+            )
 
         write_jsonl(out_sentences, records)
 
@@ -138,12 +138,9 @@ def main(argv: List[str] | None = None) -> int:
                 log.warning("Failed to render chord: %s", e)
 
         if args.motifs:
-            from ktflow.io.csv import write_edge_list as write_csv
-
             motif_counts = find_motifs(labels)
             motif_rows = [
-                {"doc_id": doc_id, "motif": k, "count": v}
-                for k, v in sorted(motif_counts.items())
+                {"doc_id": doc_id, "motif": k, "count": v} for k, v in sorted(motif_counts.items())
             ]
             # Write a simple CSV header + rows
             out_path = Path(args.motifs)

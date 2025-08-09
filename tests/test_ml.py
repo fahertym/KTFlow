@@ -3,10 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from ktflow.tag.ml import train_tfidf_lr, predict
+from ktflow.tag.ml import predict, train_tfidf_lr
 
 
-def test_ml_train_predict(tmp_path: Path):
+def test_ml_train_predict(tmp_path: Path) -> None:
     train_rows = [
         {"text": "Assume X.", "layer": "M"},
         {"text": "In general, the principle holds.", "layer": "G"},
@@ -22,5 +22,3 @@ def test_ml_train_predict(tmp_path: Path):
     preds = predict(model, ["Assume Y.", "In general, X."])
     assert preds[0] in {"M"}
     assert preds[1] in {"G"}
-
-

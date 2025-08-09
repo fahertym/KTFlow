@@ -1,14 +1,14 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Chord-like visualization using matplotlib only."""
 
-from math import cos, sin, pi
-from typing import Dict, Tuple
+from math import cos, pi, sin
 
 import matplotlib.pyplot as plt
 
 
-def draw_chord_from_counts(counts: Dict[Tuple[str, str], int], out_png: str) -> None:
+def draw_chord_from_counts(counts: dict[tuple[str, str], int], out_png: str) -> None:
     labels = ["S", "L", "R", "St", "G", "M"]
     pos = {
         lab: (cos(2 * pi * i / len(labels)), sin(2 * pi * i / len(labels)))
@@ -35,5 +35,3 @@ def draw_chord_from_counts(counts: Dict[Tuple[str, str], int], out_png: str) -> 
     plt.tight_layout()
     plt.savefig(out_png)
     plt.close()
-
-

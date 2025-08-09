@@ -1,7 +1,7 @@
 PYTHON=python
 PIP=$(PYTHON) -m pip
 
-.PHONY: setup lint fmt typecheck test cov run_demo precommit-install
+.PHONY: setup lint fmt typecheck test cov run_demo precommit-install gpu-check
 
 setup:
 	$(PIP) install -q --upgrade pip
@@ -29,5 +29,18 @@ run_demo:
 
 precommit-install:
 	pre-commit install
+
+gpu-check:
+	. .venv/bin/activate; PYTHONPATH=src $(PYTHON) scripts/gpu_check.py || true
+
+torch-nightly:
+	. .venv/bin/activate; \
+	for CH in cu129 cu128 cu126; do \
+	  echo "Trying nightly channel: $$CH"; \
+	  if $(PYTHON) -m pip install --pre --upgrade --index-url "https://download.pytorch.org/whl/nightly/$$CH" torch torchvision torchaudio; then \
+	    echo "Installed from nightly/$$CH"; exit 0; \
+	  fi; \
+	done; \
+	echo "No suitable torch nightly found" && exit 1
 
 

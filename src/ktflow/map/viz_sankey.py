@@ -2,10 +2,8 @@ from __future__ import annotations
 
 """Sankey visualization for layer transitions using Plotly."""
 
-from typing import Dict, Tuple
 
-
-def draw_sankey_from_counts(counts: Dict[Tuple[str, str], int], out_html: str) -> None:
+def draw_sankey_from_counts(counts: dict[tuple[str, str], int], out_html: str) -> None:
     try:
         import plotly.graph_objects as go
     except Exception as e:  # pragma: no cover - optional dependency
@@ -30,5 +28,3 @@ def draw_sankey_from_counts(counts: Dict[Tuple[str, str], int], out_html: str) -
         )
     )
     fig.write_html(out_html)
-
-

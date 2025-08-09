@@ -1,18 +1,18 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Visualization helpers for KTFlow graphs."""
 
 from pathlib import Path
-from typing import Dict, Tuple
 
 import matplotlib.pyplot as plt
 import networkx as nx
 
 Label = str
-Edge = Tuple[Label, Label]
+Edge = tuple[Label, Label]
 
 
-def draw_flow_graph(counts: Dict[Edge, int], path_png: str) -> None:
+def draw_flow_graph(counts: dict[Edge, int], path_png: str) -> None:
     """Draw a directed graph PNG of layer transitions.
 
     - Node labels: S, L, R, St, G, M
@@ -48,5 +48,3 @@ def draw_flow_graph(counts: Dict[Edge, int], path_png: str) -> None:
     plt.tight_layout()
     plt.savefig(path_png)
     plt.close()
-
-

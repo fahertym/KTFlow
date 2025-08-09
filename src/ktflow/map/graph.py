@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Flow mapping utilities.
@@ -7,17 +8,14 @@ edge list CSV.
 """
 
 from collections import Counter
-from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
 
 from ktflow.io.csv import write_edge_list as write_edge_list_csv_rows
 
-
 Label = str
-Edge = Tuple[Label, Label]
+Edge = tuple[Label, Label]
 
 
-def build_flow_counts(labels: List[Label], window: int = 1) -> Dict[Edge, int]:
+def build_flow_counts(labels: list[Label], window: int = 1) -> dict[Edge, int]:
     """Count transitions between consecutive labels.
 
     Parameters
@@ -34,7 +32,7 @@ def build_flow_counts(labels: List[Label], window: int = 1) -> Dict[Edge, int]:
     """
     if window < 1:
         window = 1
-    pairs: List[Edge] = []
+    pairs: list[Edge] = []
     n = len(labels)
     for i in range(n):
         for k in range(1, window + 1):
@@ -45,7 +43,7 @@ def build_flow_counts(labels: List[Label], window: int = 1) -> Dict[Edge, int]:
     return dict(counts)
 
 
-def to_edge_list_csv(doc_id: str, counts: Dict[Edge, int], path: str) -> None:
+def to_edge_list_csv(doc_id: str, counts: dict[Edge, int], path: str) -> None:
     """Write the edge list CSV with header.
 
     Parameters
@@ -69,16 +67,14 @@ def to_edge_list_csv(doc_id: str, counts: Dict[Edge, int], path: str) -> None:
     write_edge_list_csv_rows(path=path, rows=rows)
 
 
-def find_motifs(labels: List[Label]) -> Dict[str, int]:
+def find_motifs(labels: list[Label]) -> dict[str, int]:
     """Detect 3-step motifs (length-3 sequences) and count their occurrences.
 
     Example motif label: "L-G-M".
     """
-    motifs: Dict[str, int] = {}
+    motifs: dict[str, int] = {}
     for i in range(len(labels) - 2):
         tri = labels[i : i + 3]
         key = f"{tri[0]}-{tri[1]}-{tri[2]}"
         motifs[key] = motifs.get(key, 0) + 1
     return motifs
-
-

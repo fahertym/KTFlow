@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Project-level configuration and logging setup for KTFlow.
@@ -6,9 +7,8 @@ Uses pydantic-settings for environment-driven configuration and provides a
 helper to configure stdlib logging.
 """
 
-from pathlib import Path
 import logging
-from typing import Optional
+from pathlib import Path
 
 try:
     from pydantic_settings import BaseSettings
@@ -52,5 +52,3 @@ def setup_logging(verbose: bool = False) -> None:
         level=level,
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     )
-
-

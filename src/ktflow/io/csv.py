@@ -1,10 +1,11 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """CSV writing helpers."""
 
 import csv
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Iterable, Mapping
 
 
 def write_edge_list(path: str | Path, rows: Iterable[Mapping[str, object]]) -> None:
@@ -25,9 +26,7 @@ def write_edge_list(path: str | Path, rows: Iterable[Mapping[str, object]]) -> N
 
     fieldnames = ["doc_id", "from_layer", "to_layer", "count"]
     with out_path.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
+        writer2 = csv.DictWriter(f, fieldnames=fieldnames)
+        writer2.writeheader()
         for row in rows:
-            writer.writerow({k: row.get(k) for k in fieldnames})
-
-
+            writer2.writerow({k: row.get(k) for k in fieldnames})

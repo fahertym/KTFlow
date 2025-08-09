@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Model persistence helpers for taggers (joblib)."""
@@ -16,5 +17,3 @@ def save_joblib(obj: Any, path: str | Path) -> None:
 
 def load_joblib(path: str | Path) -> Any:
     return joblib.load(Path(path))
-
-

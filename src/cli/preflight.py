@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Preflight evaluation CLI: compare predicted sentence labels to a gold key.
@@ -9,9 +10,7 @@ optionally a CSV of the confusion matrix.
 
 import argparse
 import json
-from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 from sklearn.metrics import (
     accuracy_score,
@@ -21,21 +20,21 @@ from sklearn.metrics import (
 )
 
 
-def _read_jsonl(path: Path) -> List[dict]:
-    rows: List[dict] = []
+def _read_jsonl(path: Path) -> list[dict]:
+    rows: list[dict] = []
     with path.open("r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
+        for raw_line in f:
+            line = raw_line.strip()
             if not line:
                 continue
             rows.append(json.loads(line))
     return rows
 
 
-def _align_by_text(pred_rows: List[dict], gold_rows: List[dict]) -> Tuple[List[str], List[str]]:
-    gold_by_text: Dict[str, str] = {r["text"]: r["layer"] for r in gold_rows}
-    y_true: List[str] = []
-    y_pred: List[str] = []
+def _align_by_text(pred_rows: list[dict], gold_rows: list[dict]) -> tuple[list[str], list[str]]:
+    gold_by_text: dict[str, str] = {r["text"]: r["layer"] for r in gold_rows}
+    y_true: list[str] = []
+    y_pred: list[str] = []
     for r in pred_rows:
         t = r["text"]
         if t in gold_by_text:
@@ -44,7 +43,10 @@ def _align_by_text(pred_rows: List[dict], gold_rows: List[dict]) -> Tuple[List[s
     return y_true, y_pred
 
 
-def _write_confusion_csv(labels: List[str], cm, path: Path) -> None:
+from typing import Any
+
+
+def _write_confusion_csv(labels: list[str], cm: Any, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         f.write(",".join(["label"] + labels) + "\n")
@@ -53,7 +55,7 @@ def _write_confusion_csv(labels: List[str], cm, path: Path) -> None:
             f.write(f"{label},{row}\n")
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="KTFlow preflight evaluation")
     parser.add_argument("--pred", required=True, help="Predicted JSONL path")
     parser.add_argument("--gold", required=True, help="Gold JSONL path")
@@ -77,7 +79,14 @@ def main(argv: List[str] | None = None) -> int:
         print(report)
         return 2
 
-    labels = sorted({*y_true, *y_pred}, key=lambda s: ["S", "L", "R", "St", "G", "M", "UNK"].index(s) if s in ["S","L","R","St","G","M","UNK"] else 999)
+    labels = sorted(
+        {*y_true, *y_pred},
+        key=lambda s: (
+            ["S", "L", "R", "St", "G", "M", "UNK"].index(s)
+            if s in ["S", "L", "R", "St", "G", "M", "UNK"]
+            else 999
+        ),
+    )
 
     acc = accuracy_score(y_true, y_pred)
     macro_f1 = f1_score(y_true, y_pred, labels=labels, average="macro")
@@ -105,5 +114,3 @@ def main(argv: List[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

@@ -3,7 +3,7 @@ from __future__ import annotations
 from ktflow.map.graph import build_flow_counts, find_motifs
 
 
-def test_build_flow_counts():
+def test_build_flow_counts() -> None:
     labels = ["S", "L", "R", "R", "L"]
     counts = build_flow_counts(labels)
     # Expected pairs: S->L, L->R, R->R, R->L
@@ -13,7 +13,7 @@ def test_build_flow_counts():
     assert counts.get(("R", "L")) == 1
 
 
-def test_build_flow_counts_windowed():
+def test_build_flow_counts_windowed() -> None:
     labels = ["S", "L", "R", "M"]
     counts = build_flow_counts(labels, window=2)
     # Adjacent: S->L, L->R, R->M
@@ -25,11 +25,9 @@ def test_build_flow_counts_windowed():
     assert counts.get(("L", "M")) == 1
 
 
-def test_find_motifs():
+def test_find_motifs() -> None:
     labels = ["L", "G", "M", "St"]
     motifs = find_motifs(labels)
     # Expected motifs: L-G-M and G-M-St
     assert motifs.get("L-G-M") == 1
     assert motifs.get("G-M-St") == 1
-
-

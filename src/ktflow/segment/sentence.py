@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Sentence segmentation utilities.
@@ -8,8 +9,6 @@ spaCy or EDU-based segmentation.
 """
 
 import re
-from typing import List
-
 
 _SPLIT_REGEX = re.compile(
     # Split on a sentence end punctuation followed by whitespace and a likely
@@ -25,7 +24,7 @@ def _normalize_whitespace(text: str) -> str:
     return text.strip()
 
 
-def split_sentences(text: str) -> List[str]:
+def split_sentences(text: str) -> list[str]:
     """Split ``text`` into sentences.
 
     Rules:
@@ -53,15 +52,10 @@ def split_sentences(text: str) -> List[str]:
         return [normalized] if normalized else []
 
     parts = _SPLIT_REGEX.split(normalized)
-    sentences: List[str] = []
+    sentences: list[str] = []
     for part in parts:
         s = part.strip()
         if not s:
             continue
         sentences.append(s)
     return sentences
-
-import re
-def split_sentences(text: str):
-    text = re.sub(r"\s+", " ", text.strip())
-    return [s.strip() for s in re.split(r'(?<=[.!?])\s+(?=[A-Z(])', text) if s.strip()]

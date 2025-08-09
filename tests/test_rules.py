@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from ktflow.tag.rules import tag_sentence_rules
 
 
@@ -17,7 +16,5 @@ from ktflow.tag.rules import tag_sentence_rules
         ("This is unclear.", "UNK"),
     ],
 )
-def test_tag_sentence_rules(text: str, expected: str):
+def test_tag_sentence_rules(text: str, expected: str) -> None:
     assert tag_sentence_rules(text) == expected
-
-

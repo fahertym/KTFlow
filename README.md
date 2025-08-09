@@ -37,12 +37,16 @@ pytest -q --cov=ktflow --cov-report=term-missing
 
 ### KT Layers (labels)
 
-- S — Symbol: forms/terms, lists of terms, prompts like "what is".
-- L — Literal: definitions and naming ("is a", "means", "defined as").
-- R — Relational: causal/associative links ("because", "therefore", "if … then").
-- St — Structural: systems, components, feedbacks, integration.
-- G — Generative: principles/rules/transfer ("in general", "applies to").
-- M — Meta: assumptions, reframing, hidden premises.
+| Label | Name       | Summary |
+|-------|------------|---------|
+| S     | Symbol     | Forms/terms; prompts like "what is"; term lists |
+| L     | Literal    | Definitions/naming: "is a", "means", "defined as" |
+| R     | Relational | Causal/associative links: "because", "therefore", "if … then" |
+| St    | Structural | Systems/feedbacks/interaction/integration |
+| G     | Generative | Principles/rules/transfer: "in general", "applies to" |
+| M     | Meta       | Assumptions/reframing/hidden premises |
+
+Flows: readers move between layers (e.g., L→G, St→M) rather than strictly bottom-up. We track adjacent and windowed transitions to characterize cognition-in-text and detect motifs (e.g., L→G→M).
 
 ### Modules
 
@@ -75,6 +79,52 @@ python src/cli/parse_doc.py \
 ```
 
 Motifs CSV can be requested with `--motifs data/processed/kt_control_v1_motifs.csv`.
+
+### Preflight + Answer Key
+
+```bash
+python src/cli/build_answer_key.py \
+  --input data/processed/kt_control_v1_sentences.jsonl \
+  --out data/interim/answer_keys/kt_control_v1_sentences.jsonl \
+  --csv data/interim/answer_keys/kt_control_v1_seed.csv
+
+python src/cli/report_errors.py \
+  --pred data/processed/kt_control_v1_sentences.jsonl \
+  --gold data/interim/answer_keys/kt_control_v1_sentences.jsonl \
+  --out data/processed/kt_control_v1_report.html
+```
+
+### WSL2 GPU quickstart
+
+- Windows host should show GPU in `nvidia-smi` (native Windows).
+- In WSL, absence of `/dev/nvidia*` is normal. WSL uses `/dev/dxg` and `/usr/lib/wsl/lib/libcuda.so*`.
+- PyTorch install (CUDA 12.1 wheels):
+
+```bash
+. .venv/bin/activate
+python -m pip install -U pip
+python -m pip install torch torchvision torchaudio \
+  --index-url https://download.pytorch.org/whl/cu121
+make gpu-check  # prints DXG/libcuda status and CUDA availability
+```
+
+**WSL2 + CUDA (Ada/Blackwell, compute 12.x):**
+PyTorch stable may not yet ship kernels for sm_120. Use nightly cu129 wheels:
+
+```bash
+make torch-nightly
+python - <<'PY'
+import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())
+PY
+```
+
+Troubleshooting “externally-managed-environment”:
+
+```bash
+./tools/venvdoctor.sh
+# Or ensure you use the venv python explicitly:
+./.venv/bin/python -m pip install -U pip
+```
 
 ### Hybrid Tagger (TF-IDF + Logistic Regression)
 

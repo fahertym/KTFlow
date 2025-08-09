@@ -20,4 +20,29 @@ allow_redefinition = false
 check_untyped_defs = true
 ignore_missing_imports = true
 
+[project]
+name = "ktflow"
+version = "0.1.0"
+description = "Knowledge Topology Flow analysis toolkit"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pdfminer.six",
+    "scikit-learn",
+    "matplotlib",
+    "pydantic-settings",
+    "pysbd",
+    "plotly",
+    "jinja2",
+]
+
+[project.scripts]
+ktflow-parse = "cli.parse_doc:main"
+ktflow-train = "cli.train_tagger:main"
+ktflow-retag = "cli.retag:main"
+ktflow-preflight = "cli.preflight:main"
+ktflow-run-corpus = "cli.run_corpus:main"
+ktflow-report = "cli.report_errors:main"
+ktflow-build-key = "cli.build_answer_key:main"
+
 

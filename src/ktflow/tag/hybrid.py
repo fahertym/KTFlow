@@ -1,18 +1,18 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Hybrid rules+ML tagger."""
 
-from typing import Optional
 
 import numpy as np
 
+from ktflow.tag.ml import ModelBundle, predict_proba
 from ktflow.tag.rules import tag_sentence_rules
-from ktflow.tag.ml import ModelBundle, predict, predict_proba
 
 
 def tag_sentence_hybrid(
     s: str,
-    model: Optional[ModelBundle] = None,
+    model: ModelBundle | None = None,
     rules_first: bool = True,
     confidence_gap: float = 0.25,
 ) -> str:
@@ -47,5 +47,3 @@ def tag_sentence_hybrid(
         return rule_label
 
     return top_label
-
-

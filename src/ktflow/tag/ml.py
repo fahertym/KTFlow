@@ -1,9 +1,10 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Machine-learning tagger based on TF-IDF + Logistic Regression."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, Tuple
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -20,8 +21,8 @@ class ModelBundle:
 
 def featurize(
     sentences: Iterable[str],
-    vectorizer: Optional[TfidfVectorizer] = None,
-) -> Tuple[TfidfVectorizer, np.ndarray]:
+    vectorizer: TfidfVectorizer | None = None,
+) -> tuple[TfidfVectorizer, np.ndarray]:
     """Fit or transform sentences into TF-IDF features.
 
     Uses a mixed char + word n-gram representation for robustness on short texts.
@@ -33,11 +34,17 @@ def featurize(
             ngram_range=(3, 5),
             min_df=1,
         )
-    X = vectorizer.fit_transform(list(sentences)) if not hasattr(vectorizer, "vocabulary_") else vectorizer.transform(list(sentences))
+    X = (
+        vectorizer.fit_transform(list(sentences))
+        if not hasattr(vectorizer, "vocabulary_")
+        else vectorizer.transform(list(sentences))
+    )
     return vectorizer, X
 
 
-def train_tfidf_lr(train_jsonl: str, label_col: str = "layer", text_col: str = "text") -> ModelBundle:
+def train_tfidf_lr(
+    train_jsonl: str, label_col: str = "layer", text_col: str = "text"
+) -> ModelBundle:
     """Train a TF-IDF + LogisticRegression classifier on a JSONL dataset.
 
     Parameters
@@ -51,11 +58,11 @@ def train_tfidf_lr(train_jsonl: str, label_col: str = "layer", text_col: str = "
     """
     import json
 
-    texts: List[str] = []
-    labels: List[str] = []
-    with open(train_jsonl, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
+    texts: list[str] = []
+    labels: list[str] = []
+    with open(train_jsonl, encoding="utf-8") as f:
+        for raw_line in f:
+            line = raw_line.strip()
             if not line:
                 continue
             row = json.loads(line)
@@ -76,7 +83,7 @@ def train_tfidf_lr(train_jsonl: str, label_col: str = "layer", text_col: str = "
     return ModelBundle(vectorizer=vectorizer, classifier=clf, label_encoder=label_encoder)
 
 
-def predict(model: ModelBundle, sentences: List[str]) -> List[str]:
+def predict(model: ModelBundle, sentences: list[str]) -> list[str]:
     """Predict labels using the trained model."""
     X = model.vectorizer.transform(sentences)
     y = model.classifier.predict(X)
@@ -84,9 +91,7 @@ def predict(model: ModelBundle, sentences: List[str]) -> List[str]:
     return list(labels)
 
 
-def predict_proba(model: ModelBundle, sentences: List[str]) -> np.ndarray:
+def predict_proba(model: ModelBundle, sentences: list[str]) -> np.ndarray:
     """Return class probabilities (n_samples x n_classes)."""
     X = model.vectorizer.transform(sentences)
     return model.classifier.predict_proba(X)
-
-
