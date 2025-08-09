@@ -49,8 +49,22 @@ def main(argv: List[str] | None = None) -> int:
         help="Window size for flow counting (i->i+k, k in [1..window])",
     )
     parser.add_argument(
+        "--seg",
+        choices=["sentence", "edu"],
+        default="sentence",
+        help="Segmentation mode",
+    )
+    parser.add_argument(
         "--viz",
         help="Optional path to write a PNG of the flow graph",
+    )
+    parser.add_argument(
+        "--sankey",
+        help="Optional path to write a Sankey HTML",
+    )
+    parser.add_argument(
+        "--chord",
+        help="Optional path to write a chord-like PNG",
     )
     parser.add_argument(
         "--motifs",
@@ -77,7 +91,12 @@ def main(argv: List[str] | None = None) -> int:
         doc_id = _infer_doc_id(input_path)
 
         text = extract_text_from_pdf(str(input_path))
-        sentences = [s for s in split_sentences(text) if s.strip()]
+        if args.seg == "edu":
+            from ktflow.segment.edu import split_edus
+
+            sentences = [s for s in split_edus(text) if s.strip()]
+        else:
+            sentences = [s for s in split_sentences(text) if s.strip()]
 
         records = []
         labels: List[str] = []
@@ -101,6 +120,22 @@ def main(argv: List[str] | None = None) -> int:
                 draw_flow_graph(counts, args.viz)
             except Exception as e:
                 log.warning("Failed to render viz: %s", e)
+
+        if args.sankey:
+            try:
+                from ktflow.map.viz_sankey import draw_sankey_from_counts
+
+                draw_sankey_from_counts(counts, args.sankey)
+            except Exception as e:
+                log.warning("Failed to render sankey: %s", e)
+
+        if args.chord:
+            try:
+                from ktflow.map.viz_chord import draw_chord_from_counts
+
+                draw_chord_from_counts(counts, args.chord)
+            except Exception as e:
+                log.warning("Failed to render chord: %s", e)
 
         if args.motifs:
             from ktflow.io.csv import write_edge_list as write_csv

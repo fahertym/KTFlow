@@ -76,4 +76,43 @@ python src/cli/parse_doc.py \
 
 Motifs CSV can be requested with `--motifs data/processed/kt_control_v1_motifs.csv`.
 
+### Hybrid Tagger (TF-IDF + Logistic Regression)
+
+Train:
+
+```bash
+python src/cli/train_tagger.py \
+  --train data/interim/answer_keys/train_sentences.jsonl \
+  --out models/tfidf_lr.joblib
+```
+
+Retag using hybrid:
+
+```bash
+python src/cli/retag.py \
+  --input data/processed/kt_control_v1_sentences.jsonl \
+  --model models/tfidf_lr.joblib \
+  --out data/processed/kt_control_v1_sentences_hybrid.jsonl
+```
+
+### EDU Segmentation
+
+Use `--seg edu` to segment into finer-grained EDUs (requires `pysbd`).
+
+### Corpus Runner
+
+```bash
+python src/cli/run_corpus.py \
+  --input-dir data/raw --pattern "*.pdf" --out-dir data/processed \
+  --seg sentence --window 3
+```
+
+### System dependencies (optional)
+
+```bash
+sudo apt-get update
+sudo apt-get install -y graphviz graphviz-dev pandoc \
+  poppler-utils tesseract-ocr
+```
+
 
