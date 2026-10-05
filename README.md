@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> **Inactive / historical repository.** Dormant knowledge-topology research experiment. Retained as research lineage; not a current production or ICN component.
+>
+> Preserved for project archaeology. Do not infer current system state from this repository.
+
 ## Knowledge Topology Flow (KTFlow)
 
 Pipeline to parse PDFs, segment into sentences, tag each sentence with a Knowledge Topology (KT) layer, and compute flows (transitions) between adjacent sentences.
